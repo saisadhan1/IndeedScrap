@@ -278,10 +278,10 @@
 </div><!-- /app -->
 
 <script>
-const API = (window.API_BASE || 'http://localhost:8000');
+const API = 'https://indeedscrapwebsite.onrender.com';
 
 // ---------- Demo / mock data for when API is offline ----------
-const DEMO_MODE = true;   // set false when real API is running
+const DEMO_MODE = false;   // set false when real API is running
 
 function mockFetch(endpoint) {
   const seed = (s) => { let h=0; for(let c of s) h=(Math.imul(31,h)+c.charCodeAt(0))|0; return Math.abs(h); };
