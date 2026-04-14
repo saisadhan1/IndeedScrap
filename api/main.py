@@ -62,6 +62,25 @@ def scalar_db(sql: str, params: tuple = ()) -> any:
 # Health
 # ---------------------------------------------------------------------------
 
+@app.get("/")
+def root():
+    return {
+        "app": "JobIntel - B2B Hiring Intelligence API",
+        "status": "online",
+        "version": "1.0.0",
+        "endpoints": {
+            "/health": "System health check",
+            "/jobs": "List all jobs with filters",
+            "/analytics/summary": "Overall hiring summary",
+            "/analytics/top-companies": "Top hiring companies",
+            "/analytics/role-trends": "Job roles in demand",
+            "/analytics/salary-benchmarks": "Salary data by role & level",
+            "/analytics/hiring-activity": "Hiring trends (last 30 days)",
+            "/analytics/skills": "Top technology skills demanded"
+        }
+    }
+
+
 @app.get("/health")
 def health():
     total = scalar_db("SELECT COUNT(*) FROM jobs")
