@@ -248,6 +248,15 @@ job-intel/
 - All data scraped is publicly accessible without authentication.
 - The scraper uses conservative delays (2–5s randomised) to avoid overloading servers.
 - No personal/PII data is collected — only job titles, companies, and locations.
+
+---
+
+## Author
+
+**Kodurupaka Saisadhan**  
+Email: [kodurupakasaisadhan@gmail.com](mailto:kodurupakasaisadhan@gmail.com)
+
+---
 - Intended for market research, not mass application automation.
 
 ---
