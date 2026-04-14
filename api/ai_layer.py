@@ -38,6 +38,7 @@ from typing import Optional
 
 log = logging.getLogger(__name__)
 
+
 DB_PATH = os.getenv("DB_PATH", "data/jobs.db")
 
 TECH_SKILLS = [
