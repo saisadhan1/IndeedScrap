@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  # ── Scraper + Cleaner (runs on schedule) ──────────────────────
+  pipeline:
+    build: .
+    command: python scheduler/pipeline.py
+    volumes:
+      - ./data:/app/data
+    env_file: .env
+    restart: unless-stopped
+    depends_on: []
+
+  # ── FastAPI backend ────────────────────────────────────────────
+  api:
+    build: .
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    env_file: .env
+    restart: unless-stopped
+
+  # ── Static frontend (nginx) ────────────────────────────────────
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    restart: unless-stopped

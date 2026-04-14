@@ -1,0 +1,56 @@
+2026-04-14 10:16:51,720 [INFO] ============================================================
+2026-04-14 10:16:51,720 [INFO] Pipeline run started at 2026-04-14T10:16:51.720010
+2026-04-14 10:16:51,720 [INFO] [1/2] Starting scraper…
+2026-04-14 10:16:51,721 [INFO] === Scraping: data engineer in Bangalore ===
+2026-04-14 10:16:51,721 [INFO] Fetching page 1 — https://in.indeed.com/jobs?q=data+engineer&l=Bangalore&start=0
+2026-04-14 10:16:55,293 [INFO]   Parsed 16 job cards
+2026-04-14 10:16:55,293 [INFO] Waiting 2.2s before next page…
+2026-04-14 10:16:57,506 [INFO] Fetching page 2 — https://in.indeed.com/jobs?q=data+engineer&l=Bangalore&start=10
+2026-04-14 10:16:58,634 [INFO]   Parsed 0 job cards
+2026-04-14 10:16:58,634 [INFO] No jobs found on page 2 — stopping pagination
+2026-04-14 10:16:58,635 [INFO] Total unique so far: 16
+2026-04-14 10:17:03,906 [INFO] === Scraping: product manager in Hyderabad ===
+2026-04-14 10:17:03,906 [INFO] Fetching page 1 — https://in.indeed.com/jobs?q=product+manager&l=Hyderabad&start=0
+2026-04-14 10:17:07,078 [INFO]   Parsed 16 job cards
+2026-04-14 10:17:07,079 [INFO] Waiting 2.5s before next page…
+2026-04-14 10:17:09,605 [INFO] Fetching page 2 — https://in.indeed.com/jobs?q=product+manager&l=Hyderabad&start=10
+2026-04-14 10:17:10,413 [INFO]   Parsed 0 job cards
+2026-04-14 10:17:10,414 [INFO] No jobs found on page 2 — stopping pagination
+2026-04-14 10:17:10,414 [INFO] Total unique so far: 32
+2026-04-14 10:17:18,576 [INFO] === Scraping: software engineer in Mumbai ===
+2026-04-14 10:17:18,577 [INFO] Fetching page 1 — https://in.indeed.com/jobs?q=software+engineer&l=Mumbai&start=0
+2026-04-14 10:17:18,836 [WARNING] HTTPError 403 on attempt 1 for https://in.indeed.com/jobs?q=software+engineer&l=Mumbai&start=0
+2026-04-14 10:17:18,837 [INFO] Retrying in 4.5s…
+2026-04-14 10:17:23,548 [WARNING] HTTPError 403 on attempt 2 for https://in.indeed.com/jobs?q=software+engineer&l=Mumbai&start=0
+2026-04-14 10:17:23,549 [INFO] Retrying in 5.4s…
+2026-04-14 10:17:36,588 [INFO]   Parsed 16 job cards
+2026-04-14 10:17:36,589 [INFO] Waiting 2.6s before next page…
+2026-04-14 10:17:39,149 [INFO] Fetching page 2 — https://in.indeed.com/jobs?q=software+engineer&l=Mumbai&start=10
+2026-04-14 10:17:39,907 [WARNING] HTTPError 403 on attempt 1 for https://in.indeed.com/jobs?q=software+engineer&l=Mumbai&start=10
+2026-04-14 10:17:39,907 [INFO] Retrying in 5.0s…
+2026-04-14 10:17:45,214 [WARNING] HTTPError 403 on attempt 2 for https://in.indeed.com/jobs?q=software+engineer&l=Mumbai&start=10
+2026-04-14 10:17:45,216 [INFO] Retrying in 6.0s…
+2026-04-14 10:17:52,015 [INFO]   Parsed 0 job cards
+2026-04-14 10:17:52,015 [INFO] No jobs found on page 2 — stopping pagination
+2026-04-14 10:17:52,016 [INFO] Total unique so far: 48
+2026-04-14 10:17:56,798 [INFO] === Scraping: devops engineer in Pune ===
+2026-04-14 10:17:56,798 [INFO] Fetching page 1 — https://in.indeed.com/jobs?q=devops+engineer&l=Pune&start=0
+2026-04-14 10:17:58,891 [INFO]   Parsed 16 job cards
+2026-04-14 10:17:58,892 [INFO] Waiting 2.8s before next page…
+2026-04-14 10:18:01,685 [INFO] Fetching page 2 — https://in.indeed.com/jobs?q=devops+engineer&l=Pune&start=10
+2026-04-14 10:18:02,982 [INFO]   Parsed 0 job cards
+2026-04-14 10:18:02,982 [INFO] No jobs found on page 2 — stopping pagination
+2026-04-14 10:18:02,982 [INFO] Total unique so far: 63
+2026-04-14 10:18:08,501 [INFO] === Scraping: data scientist in Delhi ===
+2026-04-14 10:18:08,501 [INFO] Fetching page 1 — https://in.indeed.com/jobs?q=data+scientist&l=Delhi&start=0
+2026-04-14 10:18:11,758 [INFO]   Parsed 16 job cards
+2026-04-14 10:18:11,759 [INFO] Waiting 4.3s before next page…
+2026-04-14 10:18:16,052 [INFO] Fetching page 2 — https://in.indeed.com/jobs?q=data+scientist&l=Delhi&start=10
+2026-04-14 10:18:17,278 [INFO]   Parsed 0 job cards
+2026-04-14 10:18:17,281 [INFO] No jobs found on page 2 — stopping pagination
+2026-04-14 10:18:17,282 [INFO] Total unique so far: 79
+2026-04-14 10:18:24,723 [INFO] [2/2] Starting cleaner…
+2026-04-14 10:18:24,723 [INFO] Loading raw data from data/raw\jobs_20260414_101651.json
+2026-04-14 10:18:24,756 [INFO] Cleaning 79 raw records…
+2026-04-14 10:18:24,839 [INFO] Stored 79 jobs in data/jobs.db
+2026-04-14 10:18:24,842 [INFO] Pipeline run SUCCEEDED

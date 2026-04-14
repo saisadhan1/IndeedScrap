@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JobIntel — B2B Hiring Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:       #0f1117;
+    --surface:  #1a1d27;
+    --card:     #21253a;
+    --border:   #2d3150;
+    --accent:   #4f8ef7;
+    --accent2:  #1dce8c;
+    --accent3:  #f7834f;
+    --text:     #e8eaf2;
+    --muted:    #7b82a8;
+    --danger:   #f75b5b;
+    --radius:   10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Top nav */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .nav-meta { font-size: 12px; color: var(--muted); display: flex; gap: 16px; align-items: center; }
+  .badge { background: var(--accent2); color: #0a1f18; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+
+  /* Layout */
+  .app { max-width: 1280px; margin: 0 auto; padding: 2rem; }
+  .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; margin-bottom: 1rem; }
+
+  /* Stat cards */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; }
+  .stat-value.accent  { color: var(--accent);  }
+  .stat-value.accent2 { color: var(--accent2); }
+  .stat-value.accent3 { color: var(--accent3); }
+
+  /* Filters */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .filters select, .filters input {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none;
+    cursor: pointer;
+  }
+  .filters select:focus, .filters input:focus { border-color: var(--accent); }
+  .btn { background: var(--accent); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn:hover { opacity: 0.85; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Grid: 2-col charts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 2rem; }
+  @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Chart panels */
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+  .panel-title { font-size: 14px; font-weight: 600; margin-bottom: 1.25rem; }
+  .chart-wrap { position: relative; height: 240px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin-bottom: 2rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); background: var(--surface); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: rgba(79,142,247,0.04); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill-blue   { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .pill-green  { background: rgba(29,206,140,0.15); color: var(--accent2); }
+  .pill-orange { background: rgba(247,131,79,0.15); color: var(--accent3); }
+  .pill-red    { background: rgba(247,91,91,0.15);  color: var(--danger); }
+  .pill-muted  { background: rgba(123,130,168,0.1); color: var(--muted); }
+  .salary { font-weight: 500; color: var(--accent2); }
+  .remote-tag { color: var(--accent3); font-size: 11px; }
+
+  /* Skill bars */
+  .skill-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .skill-name { font-size: 12px; min-width: 100px; color: var(--muted); }
+  .skill-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 6px; }
+  .skill-bar { height: 6px; border-radius: 4px; background: var(--accent); }
+  .skill-pct { font-size: 12px; min-width: 36px; text-align: right; color: var(--text); }
+
+  /* Pagination */
+  .pagination { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; align-items: center; }
+  .page-info { font-size: 13px; color: var(--muted); }
+
+  /* Loading / empty */
+  .loading { text-align: center; padding: 3rem; color: var(--muted); }
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Tab bar */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .tab { padding: 10px 20px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Job<span>Intel</span></div>
+  <div class="nav-meta">
+    <span id="last-updated">Loading…</span>
+    <span class="badge" id="total-badge">—</span>
+    <span>India Hiring Intelligence</span>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- KPI row -->
+  <div class="stats" id="stats">
+    <div class="stat-card"><div class="stat-label">Total Listings</div><div class="stat-value accent" id="s-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Companies Hiring</div><div class="stat-value accent2" id="s-companies">—</div></div>
+    <div class="stat-card"><div class="stat-label">Cities Covered</div><div class="stat-value" id="s-cities">—</div></div>
+    <div class="stat-card"><div class="stat-label">Remote Roles</div><div class="stat-value accent3" id="s-remote">—</div></div>
+    <div class="stat-card"><div class="stat-label">With Salary Data</div><div class="stat-value" id="s-salary">—</div></div>
+    <div class="stat-card"><div class="stat-label">Top Role</div><div class="stat-value" style="font-size:15px" id="s-top-role">—</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">Overview</div>
+    <div class="tab" onclick="switchTab('jobs')">Job Listings</div>
+    <div class="tab" onclick="switchTab('companies')">Top Companies</div>
+    <div class="tab" onclick="switchTab('salaries')">Salary Benchmarks</div>
+    <div class="tab" onclick="switchTab('skills')">Skills Demand</div>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div class="tab-pane active" id="tab-overview">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title">Roles in Demand</div>
+        <div class="chart-wrap"><canvas id="roleChart" role="img" aria-label="Bar chart of job roles by volume"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Hiring Activity — Last 30 Days</div>
+        <div class="chart-wrap"><canvas id="activityChart" role="img" aria-label="Line chart of daily job postings"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title">Seniority Mix</div>
+        <div class="chart-wrap" style="height:200px"><canvas id="seniorityChart" role="img" aria-label="Doughnut chart of seniority levels"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Remote vs On-site</div>
+        <div class="chart-wrap" style="height:200px"><canvas id="remoteChart" role="img" aria-label="Doughnut chart of remote vs onsite roles"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOBS TAB -->
+  <div class="tab-pane" id="tab-jobs">
+    <div class="filters">
+      <select id="f-role" onchange="loadJobs()">
+        <option value="">All Roles</option>
+        <option>data engineer</option><option>data scientist</option>
+        <option>software engineer</option><option>devops</option>
+        <option>product manager</option><option>ml engineer</option>
+        <option>data analyst</option><option>backend</option>
+        <option>frontend</option><option>fullstack</option>
+      </select>
+      <select id="f-city" onchange="loadJobs()">
+        <option value="">All Cities</option>
+        <option>Bangalore</option><option>Hyderabad</option>
+        <option>Mumbai</option><option>Pune</option><option>Delhi</option>
+      </select>
+      <select id="f-seniority" onchange="loadJobs()">
+        <option value="">All Levels</option>
+        <option>Junior</option><option>Mid</option>
+        <option>Senior</option><option>Manager</option><option>Intern</option>
+      </select>
+      <select id="f-remote" onchange="loadJobs()">
+        <option value="">On-site + Remote</option>
+        <option value="true">Remote only</option>
+        <option value="false">On-site only</option>
+      </select>
+      <input oninput="debouncedLoadJobs()" />
+      <button class="btn btn-ghost" onclick="clearFilters()">Clear</button>
+    </div>
+    <div class="panel table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th><th>Company</th><th>Location</th>
+            <th>Level</th><th>Salary (Annual)</th><th>Posted</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="jobs-body"><tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+      </table>
+      <div class="pagination">
+        <button class="btn btn-ghost" id="prev-btn" onclick="changePage(-1)">← Prev</button>
+        <span class="page-info" id="page-info"></span>
+        <button class="btn btn-ghost" id="next-btn" onclick="changePage(1)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPANIES TAB -->
+  <div class="tab-pane" id="tab-companies">
+    <div class="filters">
+      <select id="fc-role" onchange="loadCompanies()">
+        <option value="">All Roles</option>
+        <option>data engineer</option><option>software engineer</option>
+        <option>product manager</option><option>devops</option><option>data scientist</option>
+      </select>
+      <select id="fc-city" onchange="loadCompanies()">
+        <option value="">All Cities</option>
+        <option>Bangalore</option><option>Hyderabad</option><option>Mumbai</option>
+      </select>
+    </div>
+    <div class="panel table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Company</th><th>Open Roles</th><th>Role Types</th><th>Cities</th></tr></thead>
+        <tbody id="companies-body"><tr><td colspan="5" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SALARIES TAB -->
+  <div class="tab-pane" id="tab-salaries">
+    <div class="filters">
+      <select id="fs-role" onchange="loadSalaries()">
+        <option value="">All Roles</option>
+        <option>data engineer</option><option>software engineer</option>
+        <option>data scientist</option><option>devops</option>
+        <option>product manager</option><option>ml engineer</option>
+      </select>
+      <select id="fs-seniority" onchange="loadSalaries()">
+        <option value="">All Levels</option>
+        <option>Junior</option><option>Mid</option>
+        <option>Senior</option><option>Manager</option>
+      </select>
+    </div>
+    <div class="panel table-wrap">
+      <table>
+        <thead><tr><th>Role</th><th>Level</th><th>Sample Size</th><th>Min (₹)</th><th>Median (₹)</th><th>Max (₹)</th></tr></thead>
+        <tbody id="salaries-body"><tr><td colspan="6" class="loading"><span class="spinner"></span>Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-title">Median Salary by Role & Level</div>
+      <div class="chart-wrap" style="height:320px"><canvas id="salaryChart" role="img" aria-label="Grouped bar chart of salaries by role and seniority"></canvas></div>
+    </div>
+  </div>
+
+  <!-- SKILLS TAB -->
+  <div class="tab-pane" id="tab-skills">
+    <div class="filters">
+      <select id="fsk-role" onchange="loadSkills()">
+        <option value="">All Roles</option>
+        <option>data engineer</option><option>software engineer</option>
+        <option>data scientist</option><option>devops</option>
+        <option>product manager</option>
+      </select>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Technology Skills Demand (from job summaries)</div>
+      <div id="skill-bars" class="loading"><span class="spinner"></span>Loading…</div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-title">Top 10 Skills — Visual</div>
+      <div class="chart-wrap"><canvas id="skillChart" role="img" aria-label="Horizontal bar chart of technology skills by mention frequency"></canvas></div>
+    </div>
+  </div>
+  <!-- unique_companies:10+rnd(0,20,dt.toISOString()+'c') -->
+
+</div><!-- /app -->
+
+<script>
+const API = (window.API_BASE || 'http://localhost:8000');
+
+// ---------- Demo / mock data for when API is offline ----------
+const DEMO_MODE = true;   // set false when real API is running
+
+function mockFetch(endpoint) {
+  const seed = (s) => { let h=0; for(let c of s) h=(Math.imul(31,h)+c.charCodeAt(0))|0; return Math.abs(h); };
+  const rnd = (min,max,s) => min + (seed(s+endpoint) % (max-min));
+
+  if (endpoint.includes('/analytics/summary')) return {
+    total_jobs: 1247, unique_companies: 312, unique_cities: 8,
+    remote_jobs: 234, with_salary: 489, top_role: 'software engineer', last_scraped: new Date().toISOString()
+  };
+  if (endpoint.includes('/analytics/role-trends')) return [
+    {role_bucket:'software engineer',total:342,remote_count:78,avg_salary:1850000,hiring_companies:124},
+    {role_bucket:'data engineer',total:198,remote_count:55,avg_salary:1650000,hiring_companies:87},
+    {role_bucket:'devops',total:145,remote_count:62,avg_salary:1720000,hiring_companies:71},
+    {role_bucket:'data scientist',total:132,remote_count:41,avg_salary:1590000,hiring_companies:63},
+    {role_bucket:'product manager',total:118,remote_count:29,avg_salary:2100000,hiring_companies:58},
+    {role_bucket:'ml engineer',total:97,remote_count:38,avg_salary:1920000,hiring_companies:52},
+    {role_bucket:'backend',total:89,remote_count:22,avg_salary:1400000,hiring_companies:47},
+    {role_bucket:'fullstack',total:76,remote_count:31,avg_salary:1350000,hiring_companies:41},
+    {role_bucket:'frontend',total:64,remote_count:18,avg_salary:1200000,hiring_companies:38},
+    {role_bucket:'data analyst',total:55,remote_count:14,avg_salary:980000,hiring_companies:32},
+  ];
+  if (endpoint.includes('/analytics/hiring-activity')) {
+    const d=[]; const now=new Date();
+    for(let i=29;i>=0;i--){const dt=new Date(now-i*86400000); d.push({posted_date:dt.toISOString().slice(0,10),postings:20+rnd(0,40,dt.toISOString()),unique_companies:10+rnd(0,20,dt.toISOString()+'c')}); }
+    return d;
+  }
+  if (endpoint.includes('/analytics/skills')) return [
+    {skill:'python',mentions:612,pct_jobs:49.1},{skill:'sql',mentions:487,pct_jobs:39.1},
+    {skill:'aws',mentions:423,pct_jobs:33.9},{skill:'docker',mentions:378,pct_jobs:30.3},
+    {skill:'kubernetes',mentions:298,pct_jobs:23.9},{skill:'java',mentions:276,pct_jobs:22.1},
+    {skill:'spark',mentions:241,pct_jobs:19.3},{skill:'react',mentions:218,pct_jobs:17.5},
+    {skill:'tensorflow',mentions:189,pct_jobs:15.2},{skill:'kafka',mentions:167,pct_jobs:13.4},
+    {skill:'airflow',mentions:145,pct_jobs:11.6},{skill:'dbt',mentions:123,pct_jobs:9.9},
+  ];
+  if (endpoint.includes('/analytics/top-companies')) return [
+    {company:'Infosys',open_roles:87,roles:'software engineer,data engineer',cities:'Bangalore,Hyderabad'},
+    {company:'Wipro',open_roles:74,roles:'devops,software engineer',cities:'Bangalore,Pune'},
+    {company:'TCS',open_roles:68,roles:'data scientist,software engineer',cities:'Mumbai,Delhi'},
+    {company:'Razorpay',open_roles:41,roles:'backend,devops',cities:'Bangalore'},
+    {company:'PhonePe',open_roles:38,roles:'data engineer,ml engineer',cities:'Bangalore'},
+    {company:'Swiggy',open_roles:35,roles:'data scientist,product manager',cities:'Bangalore,Hyderabad'},
+    {company:'Zepto',open_roles:29,roles:'software engineer,devops',cities:'Mumbai'},
+    {company:'Meesho',open_roles:27,roles:'ml engineer,data engineer',cities:'Bangalore'},
+    {company:'Zomato',open_roles:24,roles:'product manager,backend',cities:'Delhi,Bangalore'},
+    {company:'Freshworks',open_roles:22,roles:'frontend,fullstack',cities:'Chennai,Hyderabad'},
+  ];
+  if (endpoint.includes('/analytics/salary-benchmarks')) return [
+    {role_bucket:'product manager',seniority:'Senior',sample_size:18,p10_salary:1800000,median_salary:2400000,p90_salary:3600000},
+    {role_bucket:'ml engineer',seniority:'Senior',sample_size:22,p10_salary:1600000,median_salary:2200000,p90_salary:3200000},
+    {role_bucket:'data engineer',seniority:'Senior',sample_size:31,p10_salary:1400000,median_salary:1900000,p90_salary:2800000},
+    {role_bucket:'software engineer',seniority:'Senior',sample_size:44,p10_salary:1300000,median_salary:1850000,p90_salary:2700000},
+    {role_bucket:'devops',seniority:'Senior',sample_size:19,p10_salary:1350000,median_salary:1800000,p90_salary:2600000},
+    {role_bucket:'data scientist',seniority:'Mid',sample_size:28,p10_salary:900000,median_salary:1400000,p90_salary:2000000},
+    {role_bucket:'software engineer',seniority:'Mid',sample_size:67,p10_salary:800000,median_salary:1200000,p90_salary:1800000},
+    {role_bucket:'data analyst',seniority:'Mid',sample_size:24,p10_salary:600000,median_salary:950000,p90_salary:1400000},
+    {role_bucket:'software engineer',seniority:'Junior',sample_size:38,p10_salary:400000,median_salary:700000,p90_salary:1100000},
+    {role_bucket:'data engineer',seniority:'Junior',sample_size:21,p10_salary:450000,median_salary:750000,p90_salary:1150000},
+  ];
+  if (endpoint.includes('/jobs')) return {
+    total: 1247, jobs: Array.from({length:20},(_,i)=>({
+      job_id:`j${i}`, title_clean:['Senior Data Engineer','ML Engineer','Product Manager','DevOps Lead','Backend Developer'][i%5],
+      seniority:['Senior','Mid','Senior','Manager','Mid'][i%5],
+      role_bucket:['data engineer','ml engineer','product manager','devops','backend'][i%5],
+      company:['Infosys','Razorpay','Swiggy','PhonePe','Meesho','Zomato','Wipro'][i%7],
+      city:['Bangalore','Hyderabad','Mumbai','Pune','Delhi'][i%5],
+      is_remote: i%4===0 ? 1:0,
+      salary_min: [800000,1200000,1600000,2000000,600000][i%5],
+      salary_max: [1400000,2000000,2800000,3200000,1000000][i%5],
+      salary_midpoint: [1100000,1600000,2200000,2600000,800000][i%5],
+      job_type: i%3===0?'Full-time':'Contract',
+      posted_date: new Date(Date.now()-(i*2+1)*86400000).toISOString().slice(0,10),
+      job_url: 'https://in.indeed.com'
+    }))
+  };
+  return {};
+}
+
+async function apiFetch(endpoint) {
+  if (DEMO_MODE) return mockFetch(endpoint);
+  const res = await fetch(API + endpoint);
+  return res.json();
+}
+
+// ---------- Utility ----------
+const fmt = (n) => n == null ? '—' : '₹' + Math.round(n).toLocaleString('en-IN');
+const fmtLakh = (n) => n == null ? '—' : '₹' + (n/100000).toFixed(1) + 'L';
+const pillClass = (s) => ({'Senior':'pill-blue','Junior':'pill-green','Manager':'pill-orange','Intern':'pill-muted','Mid':'pill-muted'}[s] || 'pill-muted');
+const roleColor = (r) => ({'data engineer':'pill-blue','software engineer':'pill-green','devops':'pill-orange','data scientist':'pill-blue','product manager':'pill-orange'}[r] || 'pill-muted');
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+const debouncedLoadJobs = debounce(loadJobs, 400);
+
+// ---------- Charts ----------
+const CHART_COLORS = ['#4f8ef7','#1dce8c','#f7834f','#f75b5b','#a78bfa','#fbbf24','#34d399','#fb7185','#60a5fa','#4ade80'];
+
+let roleChart, activityChart, seniorityChart, remoteChart, salaryChart, skillChart;
+
+async function loadOverview() {
+  const [sum, roles, activity, jobs] = await Promise.all([
+    apiFetch('/analytics/summary'),
+    apiFetch('/analytics/role-trends'),
+    apiFetch('/analytics/hiring-activity?days=30'),
+    apiFetch('/jobs?limit=200'),
+  ]);
+
+  // KPIs
+  document.getElementById('s-total').textContent = sum.total_jobs?.toLocaleString() || '—';
+  document.getElementById('s-companies').textContent = sum.unique_companies?.toLocaleString() || '—';
+  document.getElementById('s-cities').textContent = sum.unique_cities || '—';
+  document.getElementById('s-remote').textContent = sum.remote_jobs?.toLocaleString() || '—';
+  document.getElementById('s-salary').textContent = sum.with_salary?.toLocaleString() || '—';
+  document.getElementById('s-top-role').textContent = sum.top_role || '—';
+  document.getElementById('total-badge').textContent = (sum.total_jobs || 0) + ' jobs';
+  document.getElementById('last-updated').textContent = 'Updated ' + (sum.last_scraped ? new Date(sum.last_scraped).toLocaleDateString() : 'recently');
+
+  // Role chart
+  const topRoles = roles.slice(0, 8);
+  if (roleChart) roleChart.destroy();
+  roleChart = new Chart(document.getElementById('roleChart'), {
+    type: 'bar',
+    data: {
+      labels: topRoles.map(r => r.role_bucket),
+      datasets: [{
+        label: 'Open Roles', data: topRoles.map(r => r.total),
+        backgroundColor: CHART_COLORS, borderRadius: 4,
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales: { x:{ticks:{color:'#7b82a8',font:{size:11}},grid:{display:false}}, y:{ticks:{color:'#7b82a8',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}} } }
+  });
+
+  // Activity chart
+  if (activityChart) activityChart.destroy();
+  activityChart = new Chart(document.getElementById('activityChart'), {
+    type: 'line',
+    data: {
+      labels: activity.map(d => d.posted_date?.slice(5)),
+      datasets: [{
+        label: 'Postings', data: activity.map(d => d.postings),
+        borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,0.1)',
+        fill: true, tension: 0.4, pointRadius: 2,
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales: { x:{ticks:{color:'#7b82a8',font:{size:10},maxTicksLimit:8},grid:{display:false}},
+                y:{ticks:{color:'#7b82a8',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}} } }
+  });
+
+  // Seniority doughnut
+  const senMap = {};
+  (jobs.jobs||[]).forEach(j => { senMap[j.seniority] = (senMap[j.seniority]||0)+1; });
+  if (seniorityChart) seniorityChart.destroy();
+  seniorityChart = new Chart(document.getElementById('seniorityChart'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(senMap), datasets:[{data:Object.values(senMap),backgroundColor:CHART_COLORS,borderWidth:0}] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{position:'right',labels:{color:'#7b82a8',font:{size:12}}}} }
+  });
+
+  // Remote doughnut
+  const remCount = (jobs.jobs||[]).filter(j=>j.is_remote).length;
+  const totCount = (jobs.jobs||[]).length;
+  if (remoteChart) remoteChart.destroy();
+  remoteChart = new Chart(document.getElementById('remoteChart'), {
+    type: 'doughnut',
+    data: { labels:['Remote','On-site'], datasets:[{data:[remCount, totCount-remCount],backgroundColor:['#f7834f','#2d3150'],borderWidth:0}] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{position:'right',labels:{color:'#7b82a8',font:{size:12}}}} }
+  });
+}
+
+// ---------- Jobs Table ----------
+let jobPage = 0;
+const PAGE_SIZE = 20;
+
+async function loadJobs() {
+  const params = new URLSearchParams();
+  const role = document.getElementById('f-role').value;
+  const city = document.getElementById('f-city').value;
+  const seniority = document.getElementById('f-seniority').value;
+  const remote = document.getElementById('f-remote').value;
+  const company = document.getElementById('f-company').value;
+
+  if (role) params.set('role', role);
+  if (city) params.set('city', city);
+  if (seniority) params.set('seniority', seniority);
+  if (remote !== '') params.set('is_remote', remote);
+  if (company) params.set('company', company);
+  params.set('limit', PAGE_SIZE);
+  params.set('offset', jobPage * PAGE_SIZE);
+
+  document.getElementById('jobs-body').innerHTML = '<tr><td colspan="7" class="loading"><span class="spinner"></span>Loading…</td></tr>';
+  const data = await apiFetch('/jobs?' + params.toString());
+  const jobs = data.jobs || [];
+  const total = data.total || 0;
+
+  document.getElementById('jobs-body').innerHTML = jobs.length ? jobs.map(j => `
+    <tr>
+      <td><div style="font-weight:500;margin-bottom:3px">${j.title_clean||'—'}</div><span class="pill ${roleColor(j.role_bucket)}">${j.role_bucket||'—'}</span></td>
+      <td>${j.company||'—'}</td>
+      <td>${j.city||'—'} ${j.is_remote ? '<span class="remote-tag">⟳ Remote</span>' : ''}</td>
+      <td><span class="pill ${pillClass(j.seniority)}">${j.seniority||'Mid'}</span></td>
+      <td class="salary">${j.salary_midpoint ? fmtLakh(j.salary_midpoint)+'/yr' : '—'}</td>
+      <td style="color:var(--muted);font-size:12px">${j.posted_date||'—'}</td>
+      <td>${j.job_url ? `<a href="${j.job_url}" target="_blank" style="color:var(--accent);font-size:12px">View ↗</a>` : ''}</td>
+    </tr>`).join('') : '<tr><td colspan="7" class="loading">No results found.</td></tr>';
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  document.getElementById('page-info').textContent = `Page ${jobPage+1} of ${totalPages} (${total.toLocaleString()} total)`;
+  document.getElementById('prev-btn').disabled = jobPage === 0;
+  document.getElementById('next-btn').disabled = jobPage >= totalPages - 1;
+}
+
+function changePage(dir) { jobPage += dir; loadJobs(); }
+function clearFilters() {
+  ['f-role','f-city','f-seniority','f-remote'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-company').value = '';
+  jobPage = 0; loadJobs();
+}
+
+// ---------- Companies ----------
+async function loadCompanies() {
+  const role = document.getElementById('fc-role').value;
+  const city = document.getElementById('fc-city').value;
+  const params = new URLSearchParams({limit:30});
+  if (role) params.set('role', role);
+  if (city) params.set('city', city);
+  document.getElementById('companies-body').innerHTML = '<tr><td colspan="5" class="loading"><span class="spinner"></span></td></tr>';
+  const data = await apiFetch('/analytics/top-companies?' + params);
+  document.getElementById('companies-body').innerHTML = data.map((c,i) => `
+    <tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td><strong>${c.company}</strong></td>
+      <td><span class="pill pill-blue">${c.open_roles}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${(c.roles||'').split(',').slice(0,3).join(', ')}</td>
+      <td style="font-size:12px;color:var(--muted)">${(c.cities||'').split(',').slice(0,3).join(', ')}</td>
+    </tr>`).join('');
+}
+
+// ---------- Salaries ----------
+async function loadSalaries() {
+  const role = document.getElementById('fs-role').value;
+  const seniority = document.getElementById('fs-seniority').value;
+  const params = new URLSearchParams();
+  if (role) params.set('role', role);
+  if (seniority) params.set('seniority', seniority);
+  document.getElementById('salaries-body').innerHTML = '<tr><td colspan="6" class="loading"><span class="spinner"></span></td></tr>';
+  const data = await apiFetch('/analytics/salary-benchmarks?' + params);
+
+  document.getElementById('salaries-body').innerHTML = data.map(r => `
+    <tr>
+      <td><span class="pill ${roleColor(r.role_bucket)}">${r.role_bucket}</span></td>
+      <td><span class="pill ${pillClass(r.seniority)}">${r.seniority}</span></td>
+      <td style="color:var(--muted)">${r.sample_size}</td>
+      <td class="salary">${fmtLakh(r.p10_salary)}</td>
+      <td class="salary" style="font-size:16px;font-weight:700">${fmtLakh(r.median_salary)}</td>
+      <td class="salary">${fmtLakh(r.p90_salary)}</td>
+    </tr>`).join('');
+
+  // Salary bar chart
+  const topRoles = [...new Set(data.map(d => d.role_bucket))].slice(0, 5);
+  const levels = ['Junior','Mid','Senior'];
+  const levelColors = ['#1dce8c','#4f8ef7','#f7834f'];
+  const datasets = levels.map((level, li) => ({
+    label: level, backgroundColor: levelColors[li], borderRadius: 4,
+    data: topRoles.map(role => {
+      const r = data.find(d => d.role_bucket===role && d.seniority===level);
+      return r ? Math.round(r.median_salary/100000) : 0;
+    })
+  }));
+
+  if (salaryChart) salaryChart.destroy();
+  salaryChart = new Chart(document.getElementById('salaryChart'), {
+    type: 'bar',
+    data: { labels: topRoles, datasets },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{labels:{color:'#7b82a8'}} },
+      scales: { x:{ticks:{color:'#7b82a8'},grid:{display:false}},
+                y:{ticks:{color:'#7b82a8',callback:v=>'₹'+v+'L'},grid:{color:'rgba(255,255,255,0.05)'}} } }
+  });
+}
+
+// ---------- Skills ----------
+async function loadSkills() {
+  const role = document.getElementById('fsk-role').value;
+  const params = new URLSearchParams();
+  if (role) params.set('role', role);
+  const data = await apiFetch('/analytics/skills?' + params);
+  const top10 = data.slice(0, 10);
+  const maxPct = top10[0]?.pct_jobs || 1;
+
+  document.getElementById('skill-bars').innerHTML = data.slice(0,15).map(s => `
+    <div class="skill-row">
+      <span class="skill-name">${s.skill}</span>
+      <div class="skill-bar-wrap"><div class="skill-bar" style="width:${(s.pct_jobs/maxPct*100).toFixed(1)}%"></div></div>
+      <span class="skill-pct">${s.pct_jobs}%</span>
+    </div>`).join('');
+
+  if (skillChart) skillChart.destroy();
+  skillChart = new Chart(document.getElementById('skillChart'), {
+    type: 'bar',
+    data: {
+      labels: top10.map(s => s.skill),
+      datasets:[{ label:'% of jobs', data: top10.map(s => s.pct_jobs),
+        backgroundColor: CHART_COLORS, borderRadius:4 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales: { x:{ticks:{color:'#7b82a8',font:{size:11}},grid:{display:false}},
+                y:{ticks:{color:'#7b82a8',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'}} } }
+  });
+}
+
+// ---------- Tabs ----------
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['overview','jobs','companies','salaries','skills'][i]===name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name==='jobs')      { jobPage=0; loadJobs(); }
+  if (name==='companies') loadCompanies();
+  if (name==='salaries')  loadSalaries();
+  if (name==='skills')    loadSkills();
+}
+
+// ---------- Boot ----------
+loadOverview();
+</script>
+</body>
+</html>
