@@ -5,6 +5,14 @@
 
 ---
 
+## Live Demo
+
+🚀 **Frontend Dashboard**: [https://agent-69dde8ccdfa3f645da--frabjous-sprite-5fa389.netlify.app/](https://agent-69dde8ccdfa3f645da--frabjous-sprite-5fa389.netlify.app/)
+
+🔧 **Backend API**: [https://indeedscrapweb.onrender.com/](https://indeedscrapweb.onrender.com/)
+
+---
+
 ## The Problem
 
 Talent acquisition teams and B2B SaaS companies need to know:
